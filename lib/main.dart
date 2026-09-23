@@ -22,27 +22,27 @@ void main() {
 // ==========================================
 class AppColors {
   AppColors._();
-  // Rebranded to a royal-blue "decoded data" palette to match the
-  // reference product screens (bold blue accent, off-white surfaces,
-  // near-black pill navigation, high-contrast big numerals).
-  static const Color primary = Color(0xFF3557E8);
-  static const Color primaryDark = Color(0xFF1F3FBE);
-  static const Color primarySoft = Color(0xFFE8ECFD);
-  static const Color accent = Color(0xFF5B8DEF);
-  static const Color ink = Color(0xFF0B0B12);
-  static const Color slate = Color(0xFF32343E);
-  static const Color muted = Color(0xFF868B98);
-  static const Color faint = Color(0xFFB7BAC5);
-  static const Color border = Color(0xFFE9EAF1);
-  static const Color surface = Colors.white;
-  static const Color bg = Color(0xFFF3F4F9);
-  static const Color chrome = Color(0xFF111114);
-  static const Color danger = Color(0xFFDC2626);
-  static const Color dangerSoft = Color(0xFFFEF2F2);
-  static const Color warning = Color(0xFFD97706);
-  static const Color warningSoft = Color(0xFFFFF7ED);
-  static const Color info = Color(0xFF2563EB);
-  static const Color infoSoft = Color(0xFFEFF6FF);
+
+  // Supabase-inspired dark palette.
+  static const Color primary = Color(0xFF3ECF8E);
+  static const Color primaryDark = Color(0xFF00C573);
+  static const Color primarySoft = Color(0xFF123A2A);
+  static const Color accent = Color(0xFF72E3AD);
+  static const Color ink = Color(0xFFFAFAFA);
+  static const Color slate = Color(0xFFD4D4D4);
+  static const Color muted = Color(0xFF898989);
+  static const Color faint = Color(0xFF666666);
+  static const Color border = Color(0xFF2E2E2E);
+  static const Color divider = Color(0xFF242424);
+  static const Color surface = Color(0xFF1F1F1F);
+  static const Color bg = Color(0xFF171717);
+  static const Color chrome = Color(0xFF0F0F0F);
+  static const Color danger = Color(0xFFF87171);
+  static const Color dangerSoft = Color(0xFF3A1F1F);
+  static const Color warning = Color(0xFFF6C453);
+  static const Color warningSoft = Color(0xFF3B301A);
+  static const Color info = Color(0xFF60A5FA);
+  static const Color infoSoft = Color(0xFF172B44);
 }
 
 class AppRadius {
@@ -162,6 +162,16 @@ class _TransitionAppState extends State<TransitionApp> {
   UserRole _currentRole = UserRole.landing;
   AppView _currentView = AppView.landing;
   final List<AppView> _viewHistory = [];
+
+  ThemeMode _themeMode = ThemeMode.light;
+
+  bool get _isDarkMode => _themeMode == ThemeMode.dark;
+
+  void _toggleTheme() {
+    setState(() {
+      _themeMode = _isDarkMode ? ThemeMode.light : ThemeMode.dark;
+    });
+  }
 
   // Global Mock State
   final List<ProblemItem> _problems = [
@@ -408,7 +418,9 @@ class _TransitionAppState extends State<TransitionApp> {
     return MaterialApp(
       title: 'TRANSITION Platform',
       debugShowCheckedModeBanner: false,
-      theme: _buildAppTheme(),
+      theme: _buildAppTheme(Brightness.light),
+      darkTheme: _buildAppTheme(Brightness.dark),
+      themeMode: _themeMode,
       home: PopScope(
         canPop: false,
         onPopInvoked: (didPop) {
@@ -417,7 +429,7 @@ class _TransitionAppState extends State<TransitionApp> {
           if (!handled) SystemNavigator.pop();
         },
         child: Scaffold(
-          backgroundColor: AppColors.bg,
+          backgroundColor: background,
           body: SafeArea(
             child: Column(
               children: [
@@ -453,56 +465,86 @@ class _TransitionAppState extends State<TransitionApp> {
     );
   }
 
-  ThemeData _buildAppTheme() {
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
-      brightness: Brightness.light,
+  ThemeData _buildAppTheme(Brightness brightness) {
+    final dark = brightness == Brightness.dark;
+    final background = dark ? AppColors.bg : const Color(0xFFF7F7F7);
+    final surface = dark ? AppColors.surface : Colors.white;
+    final ink = dark ? AppColors.ink : const Color(0xFF0B0B12);
+    final slate = dark ? AppColors.slate : const Color(0xFF32343E);
+    final muted = dark ? AppColors.muted : const Color(0xFF666666);
+    final faint = dark ? AppColors.faint : const Color(0xFF9A9A9A);
+    final border = dark ? AppColors.border : const Color(0xFFE5E7EB);
+
+    final colorScheme = ColorScheme(
+      brightness: brightness,
       primary: AppColors.primary,
-      secondary: AppColors.ink,
+      onPrimary: AppColors.chrome,
+      primaryContainer: dark ? AppColors.primarySoft : const Color(0xFFD8F5E6),
+      onPrimaryContainer: dark ? AppColors.accent : const Color(0xFF073B22),
+      secondary: AppColors.accent,
+      onSecondary: AppColors.chrome,
+      secondaryContainer: dark ? const Color(0xFF173A2B) : const Color(0xFFE4F8ED),
+      onSecondaryContainer: dark ? AppColors.accent : const Color(0xFF123B26),
+      tertiary: AppColors.info,
+      onTertiary: Colors.white,
+      tertiaryContainer: dark ? AppColors.infoSoft : const Color(0xFFEAF3FF),
+      onTertiaryContainer: dark ? const Color(0xFFB8D7FF) : const Color(0xFF11416F),
       error: AppColors.danger,
-      surface: AppColors.surface,
+      onError: Colors.white,
+      errorContainer: AppColors.dangerSoft,
+      onErrorContainer: dark ? const Color(0xFFFFD8D8) : const Color(0xFF5F1212),
+      surface: surface,
+      onSurface: ink,
+      surfaceTint: Colors.transparent,
+      inverseSurface: dark ? const Color(0xFFF1F1F1) : const Color(0xFF242424),
+      onInverseSurface: dark ? const Color(0xFF242424) : Colors.white,
+      inversePrimary: const Color(0xFF007A4B),
+      shadow: Colors.black,
+      scrim: Colors.black54,
+      outline: border,
+      outlineVariant: dark ? AppColors.divider : const Color(0xFFE0E0E0),
     );
 
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.light,
-      scaffoldBackgroundColor: AppColors.bg,
+      brightness: brightness,
+      scaffoldBackgroundColor: background,
       primaryColor: AppColors.primary,
       colorScheme: colorScheme,
       fontFamily: 'Roboto',
       splashFactory: InkRipple.splashFactory,
-      textTheme: const TextTheme(
+      textTheme: TextTheme(
         headlineMedium: TextStyle(
             fontWeight: FontWeight.w800,
-            color: AppColors.ink,
+            color: ink,
             letterSpacing: -0.4),
         titleLarge:
-            TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink),
+            TextStyle(fontWeight: FontWeight.w700, color: ink),
         titleMedium:
-            TextStyle(fontWeight: FontWeight.w600, color: AppColors.ink),
-        bodyMedium: TextStyle(color: AppColors.slate, height: 1.4),
-        bodySmall: TextStyle(color: AppColors.muted),
+            TextStyle(fontWeight: FontWeight.w600, color: ink),
+        bodyMedium: TextStyle(color: slate, height: 1.4),
+        bodySmall: TextStyle(color: muted),
         labelLarge: TextStyle(fontWeight: FontWeight.w600),
       ),
-      iconTheme: const IconThemeData(color: AppColors.slate),
+      iconTheme: IconThemeData(color: slate),
       dividerTheme: const DividerThemeData(
-          color: AppColors.border, thickness: 1, space: 1),
+          color: border, thickness: 1, space: 1),
       cardTheme: CardThemeData(
         elevation: 0,
         margin: EdgeInsets.zero,
         surfaceTintColor: Colors.transparent,
-        shadowColor: Colors.black.withOpacity(0.05),
+        shadowColor: Colors.black.withOpacity(dark ? 0.20 : 0.05),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          side: const BorderSide(color: AppColors.border),
+          side: BorderSide(color: border),
         ),
-        color: AppColors.surface,
+        color: surface,
       ),
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.bg,
         selectedColor: AppColors.primarySoft,
-        labelStyle: const TextStyle(
-            fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.slate),
+        labelStyle: TextStyle(
+            fontSize: 12, fontWeight: FontWeight.w600, color: slate),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -510,13 +552,13 @@ class _TransitionAppState extends State<TransitionApp> {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surface,
-        hintStyle: const TextStyle(color: AppColors.faint, fontSize: 13.5),
+        fillColor: surface,
+        hintStyle: TextStyle(color: faint, fontSize: 13.5),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.md),
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: BorderSide(color: border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.md),
@@ -531,7 +573,7 @@ class _TransitionAppState extends State<TransitionApp> {
         style: ElevatedButton.styleFrom(
           elevation: 0,
           backgroundColor: AppColors.primary,
-          foregroundColor: Colors.white,
+          foregroundColor: AppColors.chrome,
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 18),
           textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
           shape: RoundedRectangleBorder(
@@ -540,8 +582,8 @@ class _TransitionAppState extends State<TransitionApp> {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.slate,
-          side: const BorderSide(color: AppColors.border, width: 1.2),
+          foregroundColor: slate,
+          side: BorderSide(color: border, width: 1.2),
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 18),
           textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
           shape: RoundedRectangleBorder(
@@ -555,8 +597,8 @@ class _TransitionAppState extends State<TransitionApp> {
         ),
       ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: AppColors.ink,
-        contentTextStyle: const TextStyle(color: Colors.white, fontSize: 13),
+        backgroundColor: dark ? AppColors.ink : AppColors.chrome,
+        contentTextStyle: TextStyle(color: dark ? AppColors.chrome : Colors.white, fontSize: 13),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.sm)),
@@ -721,6 +763,26 @@ class _TransitionAppState extends State<TransitionApp> {
             ),
           ),
           InkWell(
+            onTap: _toggleTheme,
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              width: 36,
+              height: 36,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Icon(
+                _isDarkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                color: AppColors.primary,
+                size: 18,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          InkWell(
             onTap: _openWorkspaceSwitcher,
             borderRadius: BorderRadius.circular(20),
             child: Container(
@@ -732,8 +794,8 @@ class _TransitionAppState extends State<TransitionApp> {
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.border),
               ),
-              child: const Icon(Icons.grid_view_rounded,
-                  color: AppColors.slate, size: 17),
+              child: Icon(Icons.grid_view_rounded,
+                  color: Theme.of(context).colorScheme.onSurface, size: 17),
             ),
           ),
         ],
