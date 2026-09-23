@@ -22,17 +22,21 @@ void main() {
 // ==========================================
 class AppColors {
   AppColors._();
-  static const Color primary = Color(0xFF0E7C5F);
-  static const Color primaryDark = Color(0xFF0A5C46);
-  static const Color primarySoft = Color(0xFFE6F5EF);
-  static const Color ink = Color(0xFF0B1220);
-  static const Color slate = Color(0xFF334155);
-  static const Color muted = Color(0xFF64748B);
-  static const Color faint = Color(0xFF94A3B8);
-  static const Color border = Color(0xFFE6E9F0);
+  // Rebranded to a royal-blue "decoded data" palette to match the
+  // reference product screens (bold blue accent, off-white surfaces,
+  // near-black pill navigation, high-contrast big numerals).
+  static const Color primary = Color(0xFF3557E8);
+  static const Color primaryDark = Color(0xFF1F3FBE);
+  static const Color primarySoft = Color(0xFFE8ECFD);
+  static const Color accent = Color(0xFF5B8DEF);
+  static const Color ink = Color(0xFF0B0B12);
+  static const Color slate = Color(0xFF32343E);
+  static const Color muted = Color(0xFF868B98);
+  static const Color faint = Color(0xFFB7BAC5);
+  static const Color border = Color(0xFFE9EAF1);
   static const Color surface = Colors.white;
-  static const Color bg = Color(0xFFF6F8FB);
-  static const Color chrome = Color(0xFF0B1220);
+  static const Color bg = Color(0xFFF3F4F9);
+  static const Color chrome = Color(0xFF111114);
   static const Color danger = Color(0xFFDC2626);
   static const Color dangerSoft = Color(0xFFFEF2F2);
   static const Color warning = Color(0xFFD97706);
@@ -43,10 +47,10 @@ class AppColors {
 
 class AppRadius {
   AppRadius._();
-  static const double sm = 10;
-  static const double md = 14;
-  static const double lg = 18;
-  static const double xl = 24;
+  static const double sm = 12;
+  static const double md = 16;
+  static const double lg = 20;
+  static const double xl = 28;
 }
 
 final List<BoxShadow> kCardShadow = [
@@ -331,7 +335,7 @@ class _TransitionAppState extends State<TransitionApp> {
           child: Wrap(
             children: [
               ListTile(
-                leading: const Icon(Icons.camera_alt, color: Color(0xFF006B4D)),
+                leading: const Icon(Icons.camera_alt, color: AppColors.primary),
                 title: const Text("Take Photo"),
                 onTap: () async {
                   Navigator.pop(sheetContext);
@@ -344,8 +348,7 @@ class _TransitionAppState extends State<TransitionApp> {
                 },
               ),
               ListTile(
-                leading:
-                    const Icon(Icons.photo_library, color: Color(0xFF0284C7)),
+                leading: const Icon(Icons.photo_library, color: AppColors.info),
                 title: const Text("Choose from Gallery"),
                 onTap: () async {
                   Navigator.pop(sheetContext);
@@ -358,8 +361,7 @@ class _TransitionAppState extends State<TransitionApp> {
                 },
               ),
               ListTile(
-                leading:
-                    const Icon(Icons.upload_file, color: Color(0xFF64748B)),
+                leading: const Icon(Icons.upload_file, color: AppColors.muted),
                 title: const Text("Upload Document"),
                 onTap: () async {
                   Navigator.pop(sheetContext);
@@ -570,79 +572,168 @@ class _TransitionAppState extends State<TransitionApp> {
   }
 
   // Header switcher for rapid testing across all portals
+  String _screenTitle() {
+    switch (_currentView) {
+      case AppView.landing:
+        return "";
+      case AppView.roleSelect:
+        return "Choose Your Role";
+      case AppView.citizenHome:
+        return "Citizen Dashboard";
+      case AppView.citizenReportWizard:
+        return "Report a Problem";
+      case AppView.citizenGeofenceCheck:
+        return "Verify Nearby";
+      case AppView.problemDetailView:
+        return "Problem Details";
+      case AppView.studentHome:
+        return "Student Dashboard";
+      case AppView.studentApplication:
+        return "Apply to Solve";
+      case AppView.studentWorkspace:
+        return "My Workspace";
+      case AppView.studentEvidenceSubmit:
+        return "Submit Evidence";
+      case AppView.industrialistHome:
+        return "Industrialist Hub";
+      case AppView.industrialistSquadSelect:
+        return "Select a Squad";
+      case AppView.industrialistLiveFeed:
+        return "Live Feed";
+      case AppView.industrialistAuditVerdict:
+        return "Audit Verdict";
+    }
+  }
+
+  void _openWorkspaceSwitcher() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (sheetContext) {
+        Widget tile(UserRole role, IconData icon, String label, String sub) {
+          final selected = _currentRole == role;
+          return ListTile(
+            onTap: () {
+              Navigator.pop(sheetContext);
+              _switchRole(role);
+            },
+            leading: Container(
+              width: 40,
+              height: 40,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: selected ? AppColors.primary : AppColors.bg,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon,
+                  color: selected ? Colors.white : AppColors.slate, size: 20),
+            ),
+            title: Text(label,
+                style: const TextStyle(fontWeight: FontWeight.w700)),
+            subtitle: Text(sub,
+                style: const TextStyle(fontSize: 12, color: AppColors.muted)),
+            trailing: selected
+                ? const Icon(Icons.check_circle,
+                    color: AppColors.primary, size: 20)
+                : null,
+          );
+        }
+
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(8, 12, 8, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                      color: AppColors.border,
+                      borderRadius: BorderRadius.circular(4)),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Row(
+                    children: const [
+                      Text("Switch Workspace",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w800, fontSize: 16)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                tile(UserRole.citizen, Icons.groups_2_rounded, "Citizen",
+                    "Report & verify local problems"),
+                tile(UserRole.student, Icons.school_rounded, "Student",
+                    "Apply and execute fixes"),
+                tile(UserRole.industrialist, Icons.apartment_rounded,
+                    "Industrialist", "Sponsor & mentor squads"),
+                const Divider(height: 20),
+                tile(UserRole.landing, Icons.home_rounded, "Welcome Screen",
+                    "Back to the start"),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Minimal, native-feeling top bar: no chrome at all on the welcome
+  // screen (full-bleed onboarding), otherwise a light bar with a back
+  // arrow, the current screen's title, and a tucked-away workspace
+  // switcher instead of a permanent dev-style dropdown.
   Widget _buildGlobalTopBar() {
+    if (_currentView == AppView.landing) return const SizedBox.shrink();
+
     final canGoBack = _viewHistory.isNotEmpty ||
         (_currentRole != UserRole.landing &&
             _currentRole != UserRole.roleSelect);
+
     return Container(
-      color: AppColors.chrome,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      color: AppColors.bg,
+      padding: const EdgeInsets.fromLTRB(4, 6, 12, 6),
       child: Row(
         children: [
           if (canGoBack)
             IconButton(
               onPressed: () => _goBack(),
-              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+              icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                  color: AppColors.ink, size: 18),
               splashRadius: 20,
               tooltip: "Back",
             )
           else
-            const SizedBox(width: 12),
-          Container(
-            padding: const EdgeInsets.all(5),
-            decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.18),
-                borderRadius: BorderRadius.circular(8)),
-            child: const Icon(Icons.hub, color: Color(0xFF34D399), size: 16),
-          ),
-          const SizedBox(width: 8),
-          const Text(
-            "TRANSITION",
-            style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
-                fontSize: 13,
-                letterSpacing: 0.6),
-          ),
-          const Spacer(),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.06),
-              borderRadius: BorderRadius.circular(10),
+            const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              _screenTitle(),
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                  color: AppColors.ink,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 16,
+                  letterSpacing: -0.2),
             ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<UserRole>(
-                dropdownColor: const Color(0xFF1E293B),
-                value: _currentRole,
-                borderRadius: BorderRadius.circular(12),
-                icon: const Padding(
-                  padding: EdgeInsets.only(right: 4),
-                  child:
-                      Icon(Icons.expand_more, color: Colors.white70, size: 18),
-                ),
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12.5,
-                    fontWeight: FontWeight.w600),
-                items: const [
-                  DropdownMenuItem(
-                      value: UserRole.landing, child: Text("Welcome Screen")),
-                  DropdownMenuItem(
-                      value: UserRole.roleSelect,
-                      child: Text("Role Selection")),
-                  DropdownMenuItem(
-                      value: UserRole.citizen, child: Text("Citizen Portal")),
-                  DropdownMenuItem(
-                      value: UserRole.student, child: Text("Student Portal")),
-                  DropdownMenuItem(
-                      value: UserRole.industrialist,
-                      child: Text("Industrialist Hub")),
-                ],
-                onChanged: (role) {
-                  if (role != null) _switchRole(role);
-                },
+          ),
+          InkWell(
+            onTap: _openWorkspaceSwitcher,
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              width: 36,
+              height: 36,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.border),
               ),
+              child: const Icon(Icons.grid_view_rounded,
+                  color: AppColors.slate, size: 17),
             ),
           ),
         ],
@@ -740,20 +831,24 @@ class _TransitionAppState extends State<TransitionApp> {
     ];
 
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: const Border(top: BorderSide(color: AppColors.border)),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 12,
-              offset: const Offset(0, -4)),
-        ],
-      ),
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [for (final item in items) _navItem(item)],
+      color: AppColors.bg,
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 14),
+      child: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: AppColors.chrome,
+          borderRadius: BorderRadius.circular(40),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black.withOpacity(0.22),
+                blurRadius: 24,
+                offset: const Offset(0, 10)),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [for (final item in items) _navItem(item)],
+        ),
       ),
     );
   }
@@ -771,32 +866,23 @@ class _TransitionAppState extends State<TransitionApp> {
     }
   }
 
+  // Pill-shaped, floating dark navigation bar with circular icon buttons —
+  // the active tab lights up in the brand blue, inactive tabs stay on the
+  // dark chrome, matching the reference product's nav pattern.
   Widget _navItem(_NavEntry entry) {
     return InkWell(
       onTap: entry.onTap,
-      borderRadius: BorderRadius.circular(AppRadius.md),
+      customBorder: const CircleBorder(),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        width: 52,
+        height: 52,
         decoration: BoxDecoration(
-          color: entry.active ? AppColors.primarySoft : Colors.transparent,
-          borderRadius: BorderRadius.circular(AppRadius.md),
+          color: entry.active ? AppColors.primary : Colors.transparent,
+          shape: BoxShape.circle,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(entry.icon,
-                color: entry.active ? AppColors.primary : AppColors.faint,
-                size: 22),
-            const SizedBox(height: 2),
-            Text(entry.label,
-                style: TextStyle(
-                    fontSize: 10.5,
-                    fontWeight:
-                        entry.active ? FontWeight.w700 : FontWeight.w500,
-                    color: entry.active ? AppColors.primary : AppColors.muted)),
-          ],
-        ),
+        child: Icon(entry.icon,
+            color: entry.active ? Colors.white : Colors.white54, size: 22),
       ),
     );
   }
@@ -806,99 +892,153 @@ class _TransitionAppState extends State<TransitionApp> {
   // ==========================================
   Widget _buildLandingView() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const SizedBox(height: 12),
+          // Full-bleed gradient hero — the welcome screen has no chrome
+          // bar above it, so this doubles as the app's masthead.
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.primarySoft,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.primary.withOpacity(0.15)),
-            ),
-            child: const Text(
-              "● CIVIC TECH MOVEMENT",
-              style: TextStyle(
-                  color: AppColors.primaryDark,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 11.5,
-                  letterSpacing: 0.4),
-            ),
-          ),
-          const SizedBox(height: 18),
-          const Text(
-            "From civic reporting to real-world action.",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w800,
-                height: 1.15,
-                letterSpacing: -0.6,
-                color: AppColors.ink),
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            "Report verified local problems, connect them with industrialist mentors, and enable students to execute practical interventions.",
-            textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.muted, fontSize: 14, height: 1.4),
-          ),
-          const SizedBox(height: 28),
-          // Interactive Action Engine Illustration Node
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppRadius.xl),
-              border: Border.all(color: AppColors.border),
-              boxShadow: kCardShadow,
+            padding: const EdgeInsets.fromLTRB(24, 56, 24, 40),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppColors.primary, AppColors.primaryDark],
+              ),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(36),
+                bottomRight: Radius.circular(36),
+              ),
             ),
             child: Column(
               children: [
-                const Text("The Civic Action Engine",
-                    style: TextStyle(
-                        fontWeight: FontWeight.w700, color: AppColors.ink)),
-                const SizedBox(height: 16),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _nodeChip(
-                        "Citizen", "Reports & Verifies", AppColors.primary),
-                    const Icon(Icons.arrow_forward, color: AppColors.faint),
-                    _nodeChip(
-                        "Industrialist", "Mentors & Funds", AppColors.ink),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.16),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.hub_rounded,
+                          color: Colors.white, size: 18),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text("TRANSITION",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 14,
+                            letterSpacing: 1.2)),
                   ],
                 ),
+                const SizedBox(height: 28),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.14),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    "● CIVIC TECH MOVEMENT",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11.5,
+                        letterSpacing: 0.4),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                const Text(
+                  "From civic reporting to\nreal-world action.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      fontSize: 27,
+                      fontWeight: FontWeight.w800,
+                      height: 1.2,
+                      letterSpacing: -0.5,
+                      color: Colors.white),
+                ),
                 const SizedBox(height: 12),
-                const Icon(Icons.arrow_downward, color: AppColors.faint),
-                const SizedBox(height: 12),
-                _nodeChip("Student Unit", "Executes Work", AppColors.info),
+                Text(
+                  "Report verified local problems, connect them with industrialist mentors, and let students execute practical fixes.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      color: Colors.white.withOpacity(0.85),
+                      fontSize: 13.5,
+                      height: 1.45),
+                ),
               ],
             ),
           ),
-          const SizedBox(height: 28),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: const [
-              _StatBox(value: "8.4k", label: "ISSUES LOGGED"),
-              _StatBox(value: "94%", label: "RESOLVED RATE"),
-              _StatBox(value: "320+", label: "CAMPUS TEAMS"),
-            ],
-          ),
-          const SizedBox(height: 28),
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: ElevatedButton(
-              onPressed: () => _switchRole(UserRole.roleSelect),
-              child: const Text("Get Started →",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
+            child: Column(
+              children: [
+                // Interactive Action Engine Illustration Node
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(AppRadius.xl),
+                    border: Border.all(color: AppColors.border),
+                    boxShadow: kCardShadow,
+                  ),
+                  child: Column(
+                    children: [
+                      const Text("The Civic Action Engine",
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.ink)),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _nodeChip("Citizen", "Reports & Verifies",
+                              AppColors.primary),
+                          const Icon(Icons.arrow_forward,
+                              color: AppColors.faint),
+                          _nodeChip("Industrialist", "Mentors & Funds",
+                              AppColors.ink),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      const Icon(Icons.arrow_downward, color: AppColors.faint),
+                      const SizedBox(height: 12),
+                      _nodeChip(
+                          "Student Unit", "Executes Work", AppColors.info),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 28),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: const [
+                    _StatBox(value: "8.4k", label: "ISSUES LOGGED"),
+                    _StatBox(value: "94%", label: "RESOLVED RATE"),
+                    _StatBox(value: "320+", label: "CAMPUS TEAMS"),
+                  ],
+                ),
+                const SizedBox(height: 28),
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: ElevatedButton(
+                    onPressed: () => _switchRole(UserRole.roleSelect),
+                    child: const Text("Get Started →",
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w700)),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: () {},
+                  child: const Text("How TRANSITION Works"),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 10),
-          TextButton(
-            onPressed: () {},
-            child: const Text("How TRANSITION Works"),
           ),
         ],
       ),
@@ -935,15 +1075,13 @@ class _TransitionAppState extends State<TransitionApp> {
         children: [
           const Text("02 STEP 2 OF 3",
               style: TextStyle(
-                  color: Color(0xFF10B981),
+                  color: AppColors.accent,
                   fontWeight: FontWeight.bold,
                   fontSize: 12)),
-          const SizedBox(height: 4),
-          const Text("Choose Your Role",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 6),
           const Text(
               "The role selection customizes your civic dashboard and active toolsets.",
-              style: TextStyle(color: Color(0xFF64748B))),
+              style: TextStyle(color: AppColors.muted)),
           const SizedBox(height: 20),
           _roleCard(
             role: UserRole.citizen,
@@ -1093,7 +1231,7 @@ class _TransitionAppState extends State<TransitionApp> {
           Row(
             children: [
               const CircleAvatar(
-                  backgroundColor: Color(0xFF006B4D),
+                  backgroundColor: AppColors.primary,
                   child: Text("AS", style: TextStyle(color: Colors.white))),
               const SizedBox(width: 12),
               const Column(
@@ -1103,7 +1241,7 @@ class _TransitionAppState extends State<TransitionApp> {
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   Text("Sector 18, Metro Corridor ▾",
-                      style: TextStyle(color: Color(0xFF64748B), fontSize: 12)),
+                      style: TextStyle(color: AppColors.muted, fontSize: 12)),
                 ],
               ),
               const Spacer(),
@@ -1160,7 +1298,7 @@ class _TransitionAppState extends State<TransitionApp> {
             height: 48,
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF006B4D),
+                backgroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
               ),
@@ -1187,26 +1325,26 @@ class _TransitionAppState extends State<TransitionApp> {
           const SizedBox(height: 8),
           Card(
             child: ListTile(
-              leading: const Icon(Icons.assignment, color: Color(0xFF006B4D)),
+              leading: const Icon(Icons.assignment, color: AppColors.primary),
               title: const Text("Open drainage near block C"),
               subtitle: const Text("Under Review • Reported Yesterday"),
               trailing: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFECFDF5)),
+                    backgroundColor: AppColors.primarySoft),
                 onPressed: () => _navigateTo(AppView.problemDetailView),
                 child: const Text("Track",
-                    style: TextStyle(color: Color(0xFF006B4D), fontSize: 12)),
+                    style: TextStyle(color: AppColors.primary, fontSize: 12)),
               ),
             ),
           ),
           Card(
             child: ListTile(
-              leading: const Icon(Icons.near_me, color: Color(0xFF0284C7)),
+              leading: const Icon(Icons.near_me, color: AppColors.info),
               title: const Text("Nearby problem to verify"),
               subtitle: const Text("300m away • Pothole on Sector 18 lane"),
               trailing: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0284C7)),
+                style:
+                    ElevatedButton.styleFrom(backgroundColor: AppColors.info),
                 onPressed: () => _navigateTo(AppView.citizenGeofenceCheck),
                 child: const Text("Verify",
                     style: TextStyle(color: Colors.white, fontSize: 12)),
@@ -1223,13 +1361,13 @@ class _TransitionAppState extends State<TransitionApp> {
       margin: const EdgeInsets.only(right: 8),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFF0F172A) : Colors.white,
+        color: isSelected ? AppColors.ink : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFCBD5E1)),
+        border: Border.all(color: AppColors.border),
       ),
       child: Text(label,
           style: TextStyle(
-              color: isSelected ? Colors.white : const Color(0xFF334155),
+              color: isSelected ? Colors.white : AppColors.slate,
               fontSize: 12,
               fontWeight: FontWeight.w500)),
     );
@@ -1249,7 +1387,7 @@ class _TransitionAppState extends State<TransitionApp> {
             children: [
               Text("STEP $_reportStep OF 5",
                   style: const TextStyle(
-                      color: Color(0xFF006B4D),
+                      color: AppColors.primary,
                       fontWeight: FontWeight.bold,
                       fontSize: 12)),
               IconButton(
@@ -1258,8 +1396,8 @@ class _TransitionAppState extends State<TransitionApp> {
           ),
           LinearProgressIndicator(
               value: _reportStep / 5,
-              backgroundColor: const Color(0xFFE2E8F0),
-              color: const Color(0xFF006B4D)),
+              backgroundColor: AppColors.border,
+              color: AppColors.primary),
           const SizedBox(height: 20),
 
           // STEP 1: ADD EVIDENCE
@@ -1295,7 +1433,7 @@ class _TransitionAppState extends State<TransitionApp> {
             const SizedBox(height: 20),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF006B4D),
+                  backgroundColor: AppColors.primary,
                   minimumSize: const Size(double.infinity, 48)),
               onPressed: _reportPhotos.isEmpty
                   ? null
@@ -1343,7 +1481,7 @@ class _TransitionAppState extends State<TransitionApp> {
             const SizedBox(height: 20),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF006B4D),
+                  backgroundColor: AppColors.primary,
                   minimumSize: const Size(double.infinity, 48)),
               onPressed: () => setState(() => _reportStep = 3),
               child: const Text("Confirm Location",
@@ -1385,7 +1523,7 @@ class _TransitionAppState extends State<TransitionApp> {
             const SizedBox(height: 20),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF006B4D),
+                  backgroundColor: AppColors.primary,
                   minimumSize: const Size(double.infinity, 48)),
               onPressed: _reportSelectedLocation == null
                   ? null
@@ -1400,16 +1538,15 @@ class _TransitionAppState extends State<TransitionApp> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                  color: const Color(0xFFEFF6FF),
+                  color: AppColors.infoSoft,
                   borderRadius: BorderRadius.circular(12)),
               child: const Row(
                 children: [
-                  Icon(Icons.auto_awesome, color: Color(0xFF0284C7)),
+                  Icon(Icons.auto_awesome, color: AppColors.info),
                   SizedBox(width: 8),
                   Text("CIVICAI COPILOT • Reviewable Preview",
                       style: TextStyle(
-                          color: Color(0xFF0284C7),
-                          fontWeight: FontWeight.bold)),
+                          color: AppColors.info, fontWeight: FontWeight.bold)),
                 ],
               ),
             ),
@@ -1430,7 +1567,7 @@ class _TransitionAppState extends State<TransitionApp> {
                     Divider(),
                     Text("SIMILAR NEARBY ISSUE DETECTED",
                         style: TextStyle(
-                            color: Color(0xFFD97706),
+                            color: AppColors.warning,
                             fontWeight: FontWeight.bold,
                             fontSize: 12)),
                     SizedBox(height: 4),
@@ -1443,7 +1580,7 @@ class _TransitionAppState extends State<TransitionApp> {
             const SizedBox(height: 16),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0284C7),
+                  backgroundColor: AppColors.info,
                   minimumSize: const Size(double.infinity, 48)),
               onPressed: () => setState(() => _reportStep = 5),
               child: const Text("+ Add Evidence to Existing Problem #TR-8812",
@@ -1463,14 +1600,14 @@ class _TransitionAppState extends State<TransitionApp> {
             const Center(
               child: Column(
                 children: [
-                  Icon(Icons.check_circle, size: 64, color: Color(0xFF10B981)),
+                  Icon(Icons.check_circle, size: 64, color: AppColors.accent),
                   SizedBox(height: 12),
                   Text("Report Submitted Successfully!",
                       style:
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   SizedBox(height: 8),
                   Text("Problem ID: #TR-4092",
-                      style: TextStyle(fontSize: 16, color: Color(0xFF64748B))),
+                      style: TextStyle(fontSize: 16, color: AppColors.muted)),
                   Text("Status: Reported ➔ AI Review Pending"),
                 ],
               ),
@@ -1478,7 +1615,7 @@ class _TransitionAppState extends State<TransitionApp> {
             const SizedBox(height: 24),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF006B4D),
+                  backgroundColor: AppColors.primary,
                   minimumSize: const Size(double.infinity, 48)),
               onPressed: () => _navigateTo(AppView.problemDetailView),
               child: const Text("View Problem Details",
@@ -1502,17 +1639,17 @@ class _TransitionAppState extends State<TransitionApp> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-                color: const Color(0xFFECFDF5),
+                color: AppColors.primarySoft,
                 borderRadius: BorderRadius.circular(12)),
             child: const Row(
               children: [
-                Icon(Icons.location_on, color: Color(0xFF059669)),
+                Icon(Icons.location_on, color: AppColors.primaryDark),
                 SizedBox(width: 8),
                 Expanded(
                     child: Text(
                         "GEOFENCE TRIGGERED: You are within 60m of a reported civic problem",
                         style: TextStyle(
-                            color: Color(0xFF059669),
+                            color: AppColors.primaryDark,
                             fontWeight: FontWeight.bold))),
               ],
             ),
@@ -1521,7 +1658,7 @@ class _TransitionAppState extends State<TransitionApp> {
           const Text("Severe Asphalt Pothole near Pillar 42",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const Text("#TR-8812 • Priority Index: High (340 cars/h)",
-              style: TextStyle(color: Color(0xFF64748B))),
+              style: TextStyle(color: AppColors.muted)),
           const SizedBox(height: 12),
           OsmMapView(
             height: 140,
@@ -1545,7 +1682,7 @@ class _TransitionAppState extends State<TransitionApp> {
           const SizedBox(height: 12),
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF006B4D),
+                backgroundColor: AppColors.primary,
                 minimumSize: const Size(double.infinity, 48)),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -1573,8 +1710,7 @@ class _TransitionAppState extends State<TransitionApp> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-                color: const Color(0xFF0F172A),
-                borderRadius: BorderRadius.circular(12)),
+                color: AppColors.ink, borderRadius: BorderRadius.circular(12)),
             child: const Text(
               "ROLE PROTOCOL DISTINCTION:\nCitizens provide community verification evidence. Students submit official engineering completion evidence.",
               style: TextStyle(color: Colors.white70, fontSize: 11),
@@ -1605,11 +1741,11 @@ class _TransitionAppState extends State<TransitionApp> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                    color: const Color(0xFFECFDF5),
+                    color: AppColors.primarySoft,
                     borderRadius: BorderRadius.circular(8)),
                 child: const Text("UNDER EXECUTION",
                     style: TextStyle(
-                        color: Color(0xFF059669),
+                        color: AppColors.primaryDark,
                         fontWeight: FontWeight.bold,
                         fontSize: 10)),
               ),
@@ -1639,7 +1775,7 @@ class _TransitionAppState extends State<TransitionApp> {
             children: [
               Expanded(
                 child: Card(
-                  color: Color(0xFFFEF2F2),
+                  color: AppColors.dangerSoft,
                   child: Padding(
                     padding: EdgeInsets.all(12),
                     child: Column(
@@ -1666,7 +1802,7 @@ class _TransitionAppState extends State<TransitionApp> {
               ),
               Expanded(
                 child: Card(
-                  color: Color(0xFFF0F9FF),
+                  color: AppColors.infoSoft,
                   child: Padding(
                     padding: EdgeInsets.all(12),
                     child: Column(
@@ -1675,13 +1811,13 @@ class _TransitionAppState extends State<TransitionApp> {
                         Text("EXECUTION LOGISTICS",
                             style: TextStyle(
                                 fontSize: 9,
-                                color: Color(0xFF0284C7),
+                                color: AppColors.info,
                                 fontWeight: FontWeight.bold)),
                         Text("Complexity: Med",
                             style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
-                                color: Color(0xFF0284C7))),
+                                color: AppColors.info)),
                         SizedBox(height: 4),
                         Text(
                             "• 3 Days Turnaround\n• Asphalt Compacting\n• Bitumen & Barriers\n• Cost: \$420 USD",
@@ -1726,8 +1862,7 @@ class _TransitionAppState extends State<TransitionApp> {
       child: Row(
         children: [
           Icon(isDone ? Icons.check_circle : Icons.radio_button_unchecked,
-              color: isDone ? const Color(0xFF006B4D) : const Color(0xFFCBD5E1),
-              size: 20),
+              color: isDone ? AppColors.primary : AppColors.border, size: 20),
           const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1735,12 +1870,9 @@ class _TransitionAppState extends State<TransitionApp> {
               Text(title,
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: isDone
-                          ? const Color(0xFF0F172A)
-                          : const Color(0xFF94A3B8))),
+                      color: isDone ? AppColors.ink : AppColors.faint)),
               Text(subtitle,
-                  style:
-                      const TextStyle(fontSize: 11, color: Color(0xFF64748B))),
+                  style: const TextStyle(fontSize: 11, color: AppColors.muted)),
             ],
           ),
         ],
@@ -1760,7 +1892,7 @@ class _TransitionAppState extends State<TransitionApp> {
           Row(
             children: [
               const CircleAvatar(
-                  backgroundColor: Color(0xFF0284C7),
+                  backgroundColor: AppColors.info,
                   child: Text("RV", style: TextStyle(color: Colors.white))),
               const SizedBox(width: 12),
               const Column(
@@ -1770,18 +1902,18 @@ class _TransitionAppState extends State<TransitionApp> {
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   Text("Civil & Environmental Eng. (3rd Yr)",
-                      style: TextStyle(color: Color(0xFF64748B), fontSize: 12)),
+                      style: TextStyle(color: AppColors.muted, fontSize: 12)),
                 ],
               ),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                    color: const Color(0xFFECFDF5),
+                    color: AppColors.primarySoft,
                     borderRadius: BorderRadius.circular(12)),
                 child: const Text("• Available",
                     style: TextStyle(
-                        color: Color(0xFF059669),
+                        color: AppColors.primaryDark,
                         fontSize: 10,
                         fontWeight: FontWeight.bold)),
               ),
@@ -1812,7 +1944,7 @@ class _TransitionAppState extends State<TransitionApp> {
                         children: [
                           Text(p.category,
                               style: const TextStyle(
-                                  color: Color(0xFF0284C7),
+                                  color: AppColors.info,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 12)),
                           Text(p.priorityLabel,
@@ -1828,17 +1960,17 @@ class _TransitionAppState extends State<TransitionApp> {
                               fontWeight: FontWeight.bold, fontSize: 16)),
                       Text("Skills Required: ${p.requiredSkills}",
                           style: const TextStyle(
-                              fontSize: 12, color: Color(0xFF64748B))),
+                              fontSize: 12, color: AppColors.muted)),
                       const SizedBox(height: 8),
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                            color: const Color(0xFFF1F5F9),
+                            color: AppColors.bg,
                             borderRadius: BorderRadius.circular(8)),
                         child: Row(
                           children: [
                             const Icon(Icons.business,
-                                size: 16, color: Color(0xFF0F172A)),
+                                size: 16, color: AppColors.ink),
                             const SizedBox(width: 6),
                             Text("Sponsor: ${p.sponsorName}",
                                 style: const TextStyle(
@@ -1851,7 +1983,7 @@ class _TransitionAppState extends State<TransitionApp> {
                         width: double.infinity,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF006B4D)),
+                              backgroundColor: AppColors.primary),
                           onPressed: () =>
                               _navigateTo(AppView.studentApplication),
                           child: const Text("View Challenge & Submit Proposal",
@@ -1910,7 +2042,7 @@ class _TransitionAppState extends State<TransitionApp> {
                   ),
                   SizedBox(height: 12),
                   Text("Estimated Commitment: 8 Hours over weekend",
-                      style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                      style: TextStyle(fontSize: 12, color: AppColors.muted)),
                 ],
               ),
             ),
@@ -1918,7 +2050,7 @@ class _TransitionAppState extends State<TransitionApp> {
           const SizedBox(height: 16),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF006B4D),
+                backgroundColor: AppColors.primary,
                 minimumSize: const Size(double.infinity, 48)),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -1946,22 +2078,22 @@ class _TransitionAppState extends State<TransitionApp> {
         children: [
           const Text("DOCKET #TR-7721",
               style: TextStyle(
-                  color: Color(0xFF0284C7),
+                  color: AppColors.info,
                   fontWeight: FontWeight.bold,
                   fontSize: 12)),
           const Text("Reconstruction of Sector 14 Conduit",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           const Text("Mentor: Dr. Arvind Swamy (Apex Energy)",
-              style: TextStyle(color: Color(0xFF64748B))),
+              style: TextStyle(color: AppColors.muted)),
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-                color: const Color(0xFFEFF6FF),
+                color: AppColors.infoSoft,
                 borderRadius: BorderRadius.circular(12)),
             child: const Text(
               "EXPLICIT STATUS: Your team reports that the planned intervention has been carried out.\nNotice: Not yet marked resolved. Requires objective outcome verification.",
-              style: TextStyle(color: Color(0xFF1E40AF), fontSize: 12),
+              style: TextStyle(color: AppColors.primaryDark, fontSize: 12),
             ),
           ),
           const SizedBox(height: 20),
@@ -1979,7 +2111,7 @@ class _TransitionAppState extends State<TransitionApp> {
           const SizedBox(height: 20),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF006B4D),
+                backgroundColor: AppColors.primary,
                 minimumSize: const Size(double.infinity, 48)),
             onPressed: () => _navigateTo(AppView.studentEvidenceSubmit),
             child: const Text("Proceed to Evidence Submission →",
@@ -1994,7 +2126,7 @@ class _TransitionAppState extends State<TransitionApp> {
     return Card(
       child: ListTile(
         leading: Icon(done ? Icons.check_box : Icons.check_box_outline_blank,
-            color: done ? const Color(0xFF006B4D) : Colors.grey),
+            color: done ? AppColors.primary : Colors.grey),
         title: Text(title,
             style: TextStyle(
                 decoration: done ? TextDecoration.lineThrough : null,
@@ -2085,7 +2217,7 @@ class _TransitionAppState extends State<TransitionApp> {
           const SizedBox(height: 16),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF006B4D),
+                backgroundColor: AppColors.primary,
                 minimumSize: const Size(double.infinity, 48)),
             onPressed:
                 (_confirmCheck && _beforePhoto != null && _afterPhoto != null)
@@ -2116,7 +2248,7 @@ class _TransitionAppState extends State<TransitionApp> {
           const Row(
             children: [
               CircleAvatar(
-                  backgroundColor: Color(0xFF0F172A),
+                  backgroundColor: AppColors.ink,
                   child: Text("SS", style: TextStyle(color: Colors.white))),
               SizedBox(width: 12),
               Column(
@@ -2126,7 +2258,7 @@ class _TransitionAppState extends State<TransitionApp> {
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   Text("VP, Apex Infra Ventures • Tier Civic Patron",
-                      style: TextStyle(color: Color(0xFF64748B), fontSize: 11)),
+                      style: TextStyle(color: AppColors.muted, fontSize: 11)),
                 ],
               ),
             ],
@@ -2166,7 +2298,7 @@ class _TransitionAppState extends State<TransitionApp> {
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   const Text("Critical crossroad sinkhole & bitumen collapse",
-                      style: TextStyle(color: Color(0xFF64748B), fontSize: 12)),
+                      style: TextStyle(color: AppColors.muted, fontSize: 12)),
                   const SizedBox(height: 8),
                   const Text(
                       "Required Patronage: \$420 Capital + Bitumen Compactor"),
@@ -2176,7 +2308,7 @@ class _TransitionAppState extends State<TransitionApp> {
                       Expanded(
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF006B4D)),
+                              backgroundColor: AppColors.primary),
                           onPressed: () =>
                               _navigateTo(AppView.industrialistSquadSelect),
                           child: const Text("Take Up Problem",
@@ -2212,7 +2344,7 @@ class _TransitionAppState extends State<TransitionApp> {
           const Text("Sponsor Grant Commitment",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
           const Text("Sector 18 Road Infrastructure • 4 Candidate Applicants",
-              style: TextStyle(color: Color(0xFF64748B))),
+              style: TextStyle(color: AppColors.muted)),
           const SizedBox(height: 16),
           _applicantCard(
               "Aarav Mehta (98% Match)",
@@ -2227,8 +2359,7 @@ class _TransitionAppState extends State<TransitionApp> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-                color: const Color(0xFFF1F5F9),
-                borderRadius: BorderRadius.circular(12)),
+                color: AppColors.bg, borderRadius: BorderRadius.circular(12)),
             child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -2244,7 +2375,7 @@ class _TransitionAppState extends State<TransitionApp> {
           const SizedBox(height: 16),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0F172A),
+                backgroundColor: AppColors.ink,
                 minimumSize: const Size(double.infinity, 48)),
             onPressed: () {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -2270,13 +2401,13 @@ class _TransitionAppState extends State<TransitionApp> {
           children: [
             Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
             Text(dept,
-                style: const TextStyle(fontSize: 11, color: Color(0xFF64748B))),
+                style: const TextStyle(fontSize: 11, color: AppColors.muted)),
             const SizedBox(height: 4),
             Text(proposal, style: const TextStyle(fontSize: 12)),
             const SizedBox(height: 8),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF006B4D)),
+              style:
+                  ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
               onPressed: () {},
               child: const Text("Add to Team",
                   style: TextStyle(color: Colors.white, fontSize: 12)),
@@ -2301,7 +2432,7 @@ class _TransitionAppState extends State<TransitionApp> {
               Text("LIVE WORKSPACE • Sector 18 Asphalt Repair",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               Text("Quality Index: 94/100 | Escrow Released: \$1,450 / \$2.2k",
-                  style: TextStyle(color: Color(0xFF059669), fontSize: 12)),
+                  style: TextStyle(color: AppColors.primaryDark, fontSize: 12)),
             ],
           ),
         ),
@@ -2331,8 +2462,7 @@ class _TransitionAppState extends State<TransitionApp> {
             children: [
               IconButton(
                   onPressed: () => _showAttachmentSheet(context),
-                  icon:
-                      const Icon(Icons.attach_file, color: Color(0xFF64748B))),
+                  icon: const Icon(Icons.attach_file, color: AppColors.muted)),
               const Expanded(
                 child: TextField(
                   decoration: InputDecoration(
@@ -2343,7 +2473,7 @@ class _TransitionAppState extends State<TransitionApp> {
               const SizedBox(width: 8),
               IconButton(
                   onPressed: () {},
-                  icon: const Icon(Icons.send, color: Color(0xFF006B4D))),
+                  icon: const Icon(Icons.send, color: AppColors.primary)),
             ],
           ),
         ),
@@ -2355,7 +2485,7 @@ class _TransitionAppState extends State<TransitionApp> {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
-        leading: Icon(icon, color: const Color(0xFF006B4D)),
+        leading: Icon(icon, color: AppColors.primary),
         title: Text(author,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
         subtitle: Text(msg, style: const TextStyle(fontSize: 12)),
@@ -2374,14 +2504,14 @@ class _TransitionAppState extends State<TransitionApp> {
         children: [
           const Text("Docket #TR-7721 • INDEPENDENT AUDIT",
               style: TextStyle(
-                  color: Color(0xFF0284C7),
+                  color: AppColors.info,
                   fontWeight: FontWeight.bold,
                   fontSize: 12)),
           const Text("Ground Evidence & Verdict Decision",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
           const Card(
-            color: Color(0xFFF8FAFC),
+            color: AppColors.bg,
             child: Padding(
               padding: EdgeInsets.all(12),
               child: Column(
@@ -2407,7 +2537,7 @@ class _TransitionAppState extends State<TransitionApp> {
               Expanded(
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF10B981)),
+                      backgroundColor: AppColors.accent),
                   onPressed: () => setState(() => _auditVerdict = "Resolved"),
                   child: const Text("Resolved",
                       style: TextStyle(color: Colors.white, fontSize: 12)),
@@ -2439,7 +2569,7 @@ class _TransitionAppState extends State<TransitionApp> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                  color: const Color(0xFFFFF7ED),
+                  color: AppColors.warningSoft,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.orange)),
               child: const Column(
@@ -2462,7 +2592,7 @@ class _TransitionAppState extends State<TransitionApp> {
             const SizedBox(height: 16),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0F172A),
+                  backgroundColor: AppColors.ink,
                   minimumSize: const Size(double.infinity, 48)),
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -2586,7 +2716,7 @@ class _OsmMapViewState extends State<OsmMapView> {
           height: 22,
           child: Container(
             decoration: BoxDecoration(
-              color: const Color(0xFF0284C7),
+              color: AppColors.info,
               shape: BoxShape.circle,
               border: Border.all(color: Colors.white, width: 3),
               boxShadow: const [
@@ -2601,7 +2731,7 @@ class _OsmMapViewState extends State<OsmMapView> {
           width: 40,
           height: 46,
           alignment: Alignment.topCenter,
-          child: _pin(Icons.location_on, const Color(0xFFDC2626)),
+          child: _pin(Icons.location_on, AppColors.danger),
         ),
     ];
 
@@ -2655,7 +2785,7 @@ class _OsmMapViewState extends State<OsmMapView> {
                           width: 16,
                           height: 16,
                           child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Icon(Icons.my_location, color: Color(0xFF006B4D)),
+                      : const Icon(Icons.my_location, color: AppColors.primary),
                 ),
               ),
             if (widget.allowAddMarker)
@@ -2769,17 +2899,17 @@ class _CameraUploadFieldState extends State<CameraUploadField> {
               height: widget.previewHeight,
               width: double.infinity,
               decoration: BoxDecoration(
-                  color: const Color(0xFFF1F5F9),
+                  color: AppColors.bg,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFFCBD5E1))),
+                  border: Border.all(color: AppColors.border)),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(Icons.camera_alt,
-                      size: 48, color: Color(0xFF64748B)),
+                      size: 48, color: AppColors.muted),
                   const SizedBox(height: 8),
                   Text(widget.label,
-                      style: const TextStyle(color: Color(0xFF64748B))),
+                      style: const TextStyle(color: AppColors.muted)),
                 ],
               ),
             ),
@@ -2826,11 +2956,11 @@ class _CameraUploadFieldState extends State<CameraUploadField> {
                       height: widget.previewHeight,
                       width: widget.previewHeight,
                       decoration: BoxDecoration(
-                          color: const Color(0xFFF1F5F9),
+                          color: AppColors.bg,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFFCBD5E1))),
-                      child: const Icon(Icons.add_a_photo,
-                          color: Color(0xFF64748B)),
+                          border: Border.all(color: AppColors.border)),
+                      child:
+                          const Icon(Icons.add_a_photo, color: AppColors.muted),
                     ),
                   ),
               ],
@@ -2955,8 +3085,7 @@ class _DocumentUploadFieldState extends State<DocumentUploadField> {
                 margin: const EdgeInsets.only(bottom: 6),
                 child: ListTile(
                   dense: true,
-                  leading:
-                      const Icon(Icons.description, color: Color(0xFF0284C7)),
+                  leading: const Icon(Icons.description, color: AppColors.info),
                   title: Text(e.value.name,
                       style: const TextStyle(fontSize: 13),
                       overflow: TextOverflow.ellipsis),
