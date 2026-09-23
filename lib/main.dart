@@ -721,6 +721,26 @@ class _TransitionAppState extends State<TransitionApp> {
             ),
           ),
           InkWell(
+            onTap: _toggleTheme,
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              width: 36,
+              height: 36,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                shape: BoxShape.circle,
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Icon(
+                _isDarkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                color: AppColors.primary,
+                size: 18,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          InkWell(
             onTap: _openWorkspaceSwitcher,
             borderRadius: BorderRadius.circular(20),
             child: Container(
@@ -732,8 +752,8 @@ class _TransitionAppState extends State<TransitionApp> {
                 shape: BoxShape.circle,
                 border: Border.all(color: AppColors.border),
               ),
-              child: const Icon(Icons.grid_view_rounded,
-                  color: AppColors.slate, size: 17),
+              child: Icon(Icons.grid_view_rounded,
+                  color: Theme.of(context).colorScheme.onSurface, size: 17),
             ),
           ),
         ],
